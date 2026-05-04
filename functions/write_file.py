@@ -1,5 +1,5 @@
-# up to step 3. Line 44
-
+import os 
+from google.genai import types
 
 def write_file(working_directory, file_path, content): 
     
@@ -42,11 +42,45 @@ def write_file(working_directory, file_path, content):
 
 
     # if file_path points to an existing directory return an error
+    if os.path.isdir(target_file): 
+        return f'Error: Cannot write to "{file_path}" as it is a directory' 
+
+    # make sure that all parent directories for file_path exist. 
+    # exist_ok means that it won't do anything if they already exist
+
+    os.makedirs(os.path.dirname(target_file), exist_ok=True) 
+    
+
+    #write content variable to file
+    try: 
+        with open(target_file, "w") as f: 
+            f.write(content)
+        return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
+    except: 
+        return 'Error writing to file' 
 
 
-    # if target doesn't exist, return error 
+#end of main function
 
-    if os.path.isfile(target_file) == False: 
-        return 'Error: Target file does not exist'
+
+# declaration schema
+
+schema_write_file = types.FunctionDeclaration(
+    name="write_file",
+    description="Write or overwrite content in a specified file relative to the working directory",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file path": types.Schema(
+                type=types.Type.STRING,
+                description="File path to the file where content is to be written, relative to the working directory",
+            ),
+        },
+    ),
+)
+
+
+
+
 
 
